@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class UserMapper {
+    //commit
     public static UserDTO mapUserToDto(User user) {
         UserDTO userDto = new UserDTO();
         userDto.setId(user.getId());

@@ -14,7 +14,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @Component
 public class UserDTO {
-
+    //commit
     private int id;
     @NotBlank(groups = ExceptPatchMappingValidated.class)
     private String name;

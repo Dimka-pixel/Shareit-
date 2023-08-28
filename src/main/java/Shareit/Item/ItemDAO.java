@@ -24,5 +24,6 @@ public class ItemDAO {
     public HashMap<Integer, Item> getAllItems() {
         return items;
     }
+    //commit
 
 }

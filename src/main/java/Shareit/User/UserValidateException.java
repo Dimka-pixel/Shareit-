@@ -3,7 +3,7 @@ package Shareit.User;
 import org.springframework.http.HttpStatus;
 
 public class UserValidateException extends RuntimeException {
-
+    //commit
     private String errorMessage;
     private HttpStatus status;
 

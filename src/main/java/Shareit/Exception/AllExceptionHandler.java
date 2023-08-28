@@ -11,7 +11,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.util.Map;
 
 @ControllerAdvice
-public class AllExceptionHandler extends ResponseEntityExceptionHandler {
+public class AllExceptionHandler {
 
     @ExceptionHandler(UserValidateException.class)
     protected ResponseEntity<Object> handleConflict(UserValidateException ex, WebRequest request) {

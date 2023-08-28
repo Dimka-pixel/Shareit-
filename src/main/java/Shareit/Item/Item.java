@@ -19,5 +19,6 @@ public class Item {
     private User owner;
     private boolean available;
     private ItemRequest request;
+    //
 
 }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 @NoArgsConstructor
 public class User {
+    //commit
 
     private int id;
     private String name;

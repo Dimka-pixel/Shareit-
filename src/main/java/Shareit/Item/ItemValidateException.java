@@ -3,6 +3,7 @@ package Shareit.Item;
 import org.springframework.http.HttpStatus;
 
 public class ItemValidateException extends RuntimeException {
+    //commit
 
     private String errorMessage;
     private HttpStatus status;
