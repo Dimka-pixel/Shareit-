@@ -47,4 +47,6 @@ public class DuplicateEmailValidator implements ConstraintValidator<NotDuplicate
         }
         return true;
     }*/
+
+    public void getMessage(){}
 }
