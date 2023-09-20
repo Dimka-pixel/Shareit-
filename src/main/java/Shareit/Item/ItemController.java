@@ -1,44 +1,55 @@
 package Shareit.Item;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@RequestMapping("/items")
+@Slf4j
+@RequiredArgsConstructor
 public class ItemController {
-
+    public static final String HEADER_NAME = "X-Sharer-User-Id";
     private final ItemService itemService;
 
-
-    public ItemController(@Autowired ItemService itemService) {
-        this.itemService = itemService;
-    }
-
-    @PostMapping("/items")
-    public ItemDTO createItem(@RequestHeader(value = "X-Sharer-User-Id") int userId, @Validated @RequestBody ItemDTO itemDto) {
+    @PostMapping
+    @ResponseStatus(HttpStatus.OK)
+    public ItemDTO createItem(@RequestHeader(value = HEADER_NAME) int userId, @Validated @RequestBody ItemDTO itemDto) {
+        log.info("request POST /items");
         return itemService.addItem(userId, itemDto);
-
     }
 
-    @GetMapping("/items/{ItemId}")
-    public ItemDTO getItemById(@PathVariable int ItemId) {
-        return itemService.getItemById(ItemId);
+    @GetMapping("/{itemId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ItemDTO getItemById(@PathVariable int itemId) {
+        log.info("request GET /items/{ItemId} ItemId = {}", itemId);
+        return itemService.getItemById(itemId);
     }
 
-    @GetMapping("/items")
-    public List<ItemDTO> getAllItemsByOwnerId(@RequestHeader(value = "X-Sharer-User-Id") int userId) {
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public List<ItemDTO> getAllItemsByOwnerId(@RequestHeader(value = HEADER_NAME) int userId) {
+        log.info("request GET /items");
         return itemService.getAllItem(userId);
     }
 
-    @GetMapping("/items/search")
+    @GetMapping("/search")
+    @ResponseStatus(HttpStatus.OK)
     public List<ItemDTO> searchItems(@RequestParam String text) {
+        log.info("request GET /items/search");
         return itemService.searchItems(text);
     }
 
-    @PatchMapping("/items/{itemId}")
-    public ItemDTO updateItem(@RequestHeader(value = "X-Sharer-User-Id") int userId, @PathVariable int itemId, @RequestBody ItemDTO itemDto) {
+    @PatchMapping("/{itemId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ItemDTO updateItem(@RequestHeader(value = HEADER_NAME) int userId,
+                              @PathVariable int itemId, @RequestBody ItemDTO itemDto) {
+        log.info("request PATCH /items/{itemId} itemId = {}", itemId);
         return itemService.updateItem(userId, itemId, itemDto);
     }
 }
+

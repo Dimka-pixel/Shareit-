@@ -3,7 +3,7 @@ package Shareit.User;
 import java.util.List;
 
 public interface UserService {
-
+    
     UserDTO addUser(UserDTO userDto);
 
     UserDTO getUserById(int id);

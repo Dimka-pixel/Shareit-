@@ -1,28 +1,37 @@
 package Shareit.Item;
 
+import Shareit.Storage;
 import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
 
 @Repository
-public class ItemDAO {
+public class ItemDAO implements Storage<Item> {
 
     private int id;
-    private HashMap<Integer, Item> items = new HashMap<>();
+    private final HashMap<Integer, Item> items = new HashMap<>();
 
-    public Item addItem(Item item) {
+    @Override
+    public Item addObject(Item item) {
         id++;
         item.setId(id);
         items.put(id, item);
         return item;
     }
 
-    public Item getItemByID(int id) {
+    @Override
+    public Item getObjectById(int id) {
         return items.get(id);
     }
 
-    public HashMap<Integer, Item> getAllItems() {
+    @Override
+    public HashMap<Integer, Item> getAllObjects() {
         return items;
+    }
+
+    @Override
+    public void deleteObject(int id) {
+        items.remove(id);
     }
 
 }
