@@ -3,7 +3,6 @@ package Shareit.Item;
 import org.springframework.http.HttpStatus;
 
 public class ItemValidateException extends RuntimeException {
-    
 
     private String errorMessage;
     private HttpStatus status;
@@ -11,7 +10,7 @@ public class ItemValidateException extends RuntimeException {
     public ItemValidateException() {
     }
 
-    public ItemValidateException(String errorMessage, HttpStatus status){
+    public ItemValidateException(String errorMessage, HttpStatus status) {
         this.errorMessage = errorMessage;
         this.status = status;
     }

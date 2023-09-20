@@ -2,7 +2,6 @@ package Shareit.Item;
 
 public class ItemMapper {
 
-
     public static ItemDTO mapItemToDto(Item item) {
         ItemDTO itemDto = null;
 

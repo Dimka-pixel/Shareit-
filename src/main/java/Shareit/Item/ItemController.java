@@ -1,8 +1,7 @@
 package Shareit.Item;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -11,37 +10,37 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/items")
+@Slf4j
+@RequiredArgsConstructor
 public class ItemController {
     public static final String HEADER_NAME = "X-Sharer-User-Id";
-    @Autowired
-    private ItemService itemService;
-    private Logger logger = LoggerFactory.getLogger(ItemController.class);
+    private final ItemService itemService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
     public ItemDTO createItem(@RequestHeader(value = HEADER_NAME) int userId, @Validated @RequestBody ItemDTO itemDto) {
-        logger.info("request POST /items");
+        log.info("request POST /items");
         return itemService.addItem(userId, itemDto);
     }
 
-    @GetMapping("/{ItemId}")
+    @GetMapping("/{itemId}")
     @ResponseStatus(HttpStatus.OK)
-    public ItemDTO getItemById(@PathVariable int ItemId) {
-        logger.info("request GET /items/{ItemId} ItemId = {}", ItemId);
-        return itemService.getItemById(ItemId);
+    public ItemDTO getItemById(@PathVariable int itemId) {
+        log.info("request GET /items/{ItemId} ItemId = {}", itemId);
+        return itemService.getItemById(itemId);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<ItemDTO> getAllItemsByOwnerId(@RequestHeader(value = HEADER_NAME) int userId) {
-        logger.info("request GET /items");
+        log.info("request GET /items");
         return itemService.getAllItem(userId);
     }
 
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
     public List<ItemDTO> searchItems(@RequestParam String text) {
-        logger.info("request GET /items/search");
+        log.info("request GET /items/search");
         return itemService.searchItems(text);
     }
 
@@ -49,7 +48,7 @@ public class ItemController {
     @ResponseStatus(HttpStatus.OK)
     public ItemDTO updateItem(@RequestHeader(value = HEADER_NAME) int userId,
                               @PathVariable int itemId, @RequestBody ItemDTO itemDto) {
-        logger.info("request PATCH /items/{itemId} itemId = {}", itemId);
+        log.info("request PATCH /items/{itemId} itemId = {}", itemId);
         return itemService.updateItem(userId, itemId, itemDto);
     }
 }

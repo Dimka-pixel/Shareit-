@@ -11,4 +11,5 @@ public interface Storage<T> {
     HashMap<Integer, T> getAllObjects();
 
     void deleteObject(int id);
+
 }

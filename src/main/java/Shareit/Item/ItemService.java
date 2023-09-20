@@ -6,7 +6,6 @@ import java.util.List;
 
 @Service
 public interface ItemService {
-    
 
     ItemDTO addItem(int id, ItemDTO itemDto);
 

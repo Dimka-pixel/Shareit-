@@ -1,32 +1,39 @@
 package Shareit.User;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @Validated
+@RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService {
-    @Autowired
-    private UserDAO userDao;
+    private final UserDAO userDao;
 
-    Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
-
-    @NotDuplicateEmail
     @Override
     public UserDTO addUser(UserDTO userDto) {
         User user = UserMapper.mapDtoToUser(userDto);
-        userDao.addObject(user);
+        HashSet<String> emails = new HashSet<>();
+        for(UserDTO userDtoCheckEmail : getAllUsers()){
+            emails.add(userDtoCheckEmail.getEmail());
+        }
+        if(!emails.contains(userDto.getEmail())) {
+            userDao.addObject(user);
+        } else {
+            throw new UserValidateException("This email address already used", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
         UserDTO userDTO = UserMapper.mapUserToDto(user);
-        logger.info("return {}", userDTO);
+        log.info("return {}", userDTO);
         return userDTO;
+
     }
 
     @Override
@@ -36,22 +43,27 @@ public class UserServiceImpl implements UserService {
         if (user != null) {
             userDTO = UserMapper.mapUserToDto(user);
         } else {
-            logger.warn("User with id = {} not found", id);
+            log.warn("User with id = {} not found", id);
             throw new UserValidateException("User with id " + id + " not found", HttpStatus.NOT_FOUND);
         }
-        logger.info("return" + userDTO);
+        log.info("return {}", userDTO);
         return userDTO;
     }
 
-    @NotDuplicateEmail
     @Override
     public UserDTO updateUser(UserDTO userDTO, int id) {
         User updateUser = Optional.ofNullable(userDao.getObjectById(id)).orElseThrow();
         if (userDTO.getEmail() != null) {
             if (!userDTO.getEmail().isBlank()) {
+                for(UserDTO userDtoCheckEmail : getAllUsers()){
+                    if(userDtoCheckEmail.getEmail().equals(userDTO.getEmail())&&userDtoCheckEmail.getId()!=id){
+                        log.warn("The field \"Email\" is exists");
+                        throw new UserValidateException("This email already used", HttpStatus.INTERNAL_SERVER_ERROR);
+                    }
+                }
                 updateUser.setEmail(userDTO.getEmail());
             } else {
-                logger.warn("The field \"Email\" is blank");
+                log.warn("The field \"Email\" is blank");
                 throw new UserValidateException("The field \"Email\" should not be empty", HttpStatus.BAD_REQUEST);
             }
         }
@@ -59,7 +71,7 @@ public class UserServiceImpl implements UserService {
             if (!userDTO.getName().isBlank()) {
                 updateUser.setName(userDTO.getName());
             } else {
-                logger.warn("The field \"name\" is blank");
+                log.warn("The field \"name\" is blank");
                 throw new UserValidateException("The field \"name\" should not be empty", HttpStatus.BAD_REQUEST);
             }
 
@@ -69,7 +81,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(int id) {
-        logger.info("Delete user with id = {}", id);
+        log.info("Delete user with id = {}", id);
         userDao.deleteObject(id);
     }
 
@@ -81,7 +93,7 @@ public class UserServiceImpl implements UserService {
                 users.add(UserMapper.mapUserToDto(user));
             }
         }
-        logger.info("return" + users);
+        log.info("return {}", users);
         return users;
     }
 

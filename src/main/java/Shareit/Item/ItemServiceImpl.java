@@ -2,9 +2,8 @@ package Shareit.Item;
 
 import Shareit.User.UserMapper;
 import Shareit.User.UserServiceImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -13,21 +12,19 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class ItemServiceImpl implements ItemService {
 
-    Logger logger = LoggerFactory.getLogger(ItemServiceImpl.class);
-
-    @Autowired
-    private ItemDAO itemDao;
-    @Autowired
-    private UserServiceImpl userService;
+    private final ItemDAO itemDao;
+    private final UserServiceImpl userService;
 
     @Override
     public ItemDTO addItem(int id, ItemDTO itemDto) {
         Item item = ItemMapper.mapDtoToItem(itemDto);
         item.setOwner(UserMapper.mapDtoToUser(userService.getUserById(id)));
         itemDao.addObject(item);
-        logger.info("return " + item);
+        log.info("return {}", item);
         return ItemMapper.mapItemToDto(item);
     }
 
@@ -39,7 +36,7 @@ public class ItemServiceImpl implements ItemService {
                 if (!itemDto.getName().isBlank()) {
                     item.setName(itemDto.getName());
                 } else {
-                    logger.warn("The field \"name\" is blank");
+                    log.warn("The field \"name\" is blank");
                     throw new ItemValidateException("The field \"name\" should not be empty", HttpStatus.BAD_REQUEST);
                 }
             }
@@ -47,17 +44,17 @@ public class ItemServiceImpl implements ItemService {
                 if (!itemDto.getDescription().isBlank()) {
                     item.setDescription(itemDto.getDescription());
                 } else {
-                    logger.warn("The field \"description\" is blank");
+                    log.warn("The field \"description\" is blank");
                     throw new ItemValidateException("The field \"description\" should not be empty", HttpStatus.BAD_REQUEST);
                 }
             }
             if (itemDto.getAvailable() != null) {
                 item.setAvailable(itemDto.getAvailable());
             }
-            logger.info("return " + ItemMapper.mapItemToDto(item));
+            log.info("return {}", ItemMapper.mapItemToDto(item));
             return ItemMapper.mapItemToDto(item);
         } else {
-            logger.warn("This user is not owner");
+            log.warn("This user is not owner");
             throw new ItemValidateException("This user is not owner", HttpStatus.NOT_FOUND);
         }
 
@@ -67,7 +64,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemDTO getItemById(int id) {
         Item item = Optional.ofNullable(itemDao.getObjectById(id)).orElseThrow();
         ItemDTO itemDTO = ItemMapper.mapItemToDto(item);
-        logger.info("return " + itemDTO);
+        log.info("return {}", itemDTO);
         return itemDTO;
     }
 
@@ -81,7 +78,7 @@ public class ItemServiceImpl implements ItemService {
                 }
             }
         }
-        logger.info("return " + items);
+        log.info("return {}", items);
         return items;
     }
 
@@ -97,10 +94,10 @@ public class ItemServiceImpl implements ItemService {
             }
 
         } else {
-            logger.warn("The description is empty");
+            log.warn("The description is empty");
             throw new ItemValidateException("The description should not be empty", HttpStatus.BAD_REQUEST);
         }
-        logger.info("return " + items);
+        log.info("return {}", items);
         return items;
     }
 

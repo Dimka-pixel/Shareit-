@@ -9,7 +9,7 @@ import java.util.HashMap;
 public class ItemDAO implements Storage<Item> {
 
     private int id;
-    private HashMap<Integer, Item> items = new HashMap<>();
+    private final HashMap<Integer, Item> items = new HashMap<>();
 
     @Override
     public Item addObject(Item item) {
@@ -31,6 +31,7 @@ public class ItemDAO implements Storage<Item> {
 
     @Override
     public void deleteObject(int id) {
-
+        items.remove(id);
     }
+
 }
