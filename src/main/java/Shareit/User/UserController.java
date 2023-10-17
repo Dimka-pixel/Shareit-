@@ -2,9 +2,6 @@ package Shareit.User;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +14,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class UserController {
-    private final UserServiceImpl userService;
+    private final UserService userService;
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
@@ -33,6 +30,7 @@ public class UserController {
         log.info("response GET /users");
         return userService.getAllUsers();
     }
+
 
     @PostMapping
     @ResponseStatus(HttpStatus.OK)

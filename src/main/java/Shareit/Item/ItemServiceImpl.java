@@ -1,7 +1,9 @@
 package Shareit.Item;
 
+import Shareit.User.User;
+import Shareit.User.UserDTO;
 import Shareit.User.UserMapper;
-import Shareit.User.UserServiceImpl;
+import Shareit.User.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -16,22 +18,24 @@ import java.util.Optional;
 @Slf4j
 public class ItemServiceImpl implements ItemService {
 
-    private final ItemDAO itemDao;
-    private final UserServiceImpl userService;
+    private final ItemRepository itemRepository;
+    private final UserService userService;
 
     @Override
     public ItemDTO addItem(int id, ItemDTO itemDto) {
         Item item = ItemMapper.mapDtoToItem(itemDto);
-        item.setOwner(UserMapper.mapDtoToUser(userService.getUserById(id)));
-        itemDao.addObject(item);
+        User user = UserMapper.mapDtoToUser(userService.getUserById(id));
+        item.setOwner(user);
+        itemRepository.save(item);
         log.info("return {}", item);
         return ItemMapper.mapItemToDto(item);
     }
 
     @Override
     public ItemDTO updateItem(int userId, int itemId, ItemDTO itemDto) {
-        Item item = Optional.ofNullable(itemDao.getObjectById(itemId)).orElseThrow();
-        if (userId == item.getOwner().getId()) {
+        User user = UserMapper.mapDtoToUser(userService.getUserById(userId));
+        Item item = itemRepository.getReferenceById(itemId);
+        if (user.equals(item.getOwner())) {
             if (itemDto.getName() != null) {
                 if (!itemDto.getName().isBlank()) {
                     item.setName(itemDto.getName());
@@ -49,7 +53,7 @@ public class ItemServiceImpl implements ItemService {
                 }
             }
             if (itemDto.getAvailable() != null) {
-                item.setAvailable(itemDto.getAvailable());
+                item.set_available(itemDto.getAvailable());
             }
             log.info("return {}", ItemMapper.mapItemToDto(item));
             return ItemMapper.mapItemToDto(item);
@@ -62,7 +66,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDTO getItemById(int id) {
-        Item item = Optional.ofNullable(itemDao.getObjectById(id)).orElseThrow();
+        Item item = itemRepository.getReferenceById(id);
         ItemDTO itemDTO = ItemMapper.mapItemToDto(item);
         log.info("return {}", itemDTO);
         return itemDTO;
@@ -71,9 +75,11 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDTO> getAllItem(int id) {
         List<ItemDTO> items = new ArrayList<>();
+        List<Item> allItems = itemRepository.findAll();
+        User user = UserMapper.mapDtoToUser(userService.getUserById(id));
         if (userService.getUserById(id) != null) {
-            for (Item item : itemDao.getAllObjects().values()) {
-                if (!itemDao.getAllObjects().isEmpty() && item.getOwner().getId() == id) {
+            for (Item item :  allItems) {
+                if (! allItems.isEmpty() && user.equals(item.getOwner())) {
                     items.add(ItemMapper.mapItemToDto(item));
                 }
             }
@@ -85,14 +91,14 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDTO> searchItems(String text) {
         List<ItemDTO> items = new ArrayList<>();
+        List<Item> allItems = itemRepository.findAll();
         if (!text.isBlank()) {
-            for (Item item : itemDao.getAllObjects().values()) {
-                if (!text.isEmpty() && !itemDao.getAllObjects().isEmpty() && item.getDescription().toLowerCase().
-                        contains(text.toLowerCase()) && item.isAvailable()) {
+            for (Item item :  allItems) {
+                if (!text.isEmpty() && ! allItems.isEmpty() && item.getDescription().toLowerCase().
+                        contains(text.toLowerCase()) && item.is_available()) {
                     items.add(ItemMapper.mapItemToDto(item));
                 }
             }
-
         } else {
             log.warn("The description is empty");
             throw new ItemValidateException("The description should not be empty", HttpStatus.BAD_REQUEST);

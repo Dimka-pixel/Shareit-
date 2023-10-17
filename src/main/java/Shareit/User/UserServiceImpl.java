@@ -2,8 +2,10 @@ package Shareit.User;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.postgresql.util.PSQLException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.ArrayList;
@@ -12,33 +14,23 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@Validated
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class UserServiceImpl implements UserService {
-    private final UserDAO userDao;
+    private final UserRepository userDao;
 
     @Override
     public UserDTO addUser(UserDTO userDto) {
         User user = UserMapper.mapDtoToUser(userDto);
-        HashSet<String> emails = new HashSet<>();
-        for(UserDTO userDtoCheckEmail : getAllUsers()){
-            emails.add(userDtoCheckEmail.getEmail());
-        }
-        if(!emails.contains(userDto.getEmail())) {
-            userDao.addObject(user);
-        } else {
-            throw new UserValidateException("This email address already used", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        UserDTO userDTO = UserMapper.mapUserToDto(user);
-        log.info("return {}", userDTO);
-        return userDTO;
-
+        log.info("return {}", userDto);
+        userDao.save(user);
+        return UserMapper.mapUserToDto(user);
     }
 
     @Override
     public UserDTO getUserById(int id) {
-        User user = userDao.getObjectById(id);
+        User user = userDao.getReferenceById(id);
         UserDTO userDTO;
         if (user != null) {
             userDTO = UserMapper.mapUserToDto(user);
@@ -52,16 +44,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO updateUser(UserDTO userDTO, int id) {
-        User updateUser = Optional.ofNullable(userDao.getObjectById(id)).orElseThrow();
+        User user = userDao.getReferenceById(id);
         if (userDTO.getEmail() != null) {
             if (!userDTO.getEmail().isBlank()) {
-                for(UserDTO userDtoCheckEmail : getAllUsers()){
-                    if(userDtoCheckEmail.getEmail().equals(userDTO.getEmail())&&userDtoCheckEmail.getId()!=id){
-                        log.warn("The field \"Email\" is exists");
-                        throw new UserValidateException("This email already used", HttpStatus.INTERNAL_SERVER_ERROR);
-                    }
-                }
-                updateUser.setEmail(userDTO.getEmail());
+                user.setEmail(userDTO.getEmail());
             } else {
                 log.warn("The field \"Email\" is blank");
                 throw new UserValidateException("The field \"Email\" should not be empty", HttpStatus.BAD_REQUEST);
@@ -69,33 +55,33 @@ public class UserServiceImpl implements UserService {
         }
         if (userDTO.getName() != null) {
             if (!userDTO.getName().isBlank()) {
-                updateUser.setName(userDTO.getName());
+                user.setName(userDTO.getName());
             } else {
                 log.warn("The field \"name\" is blank");
                 throw new UserValidateException("The field \"name\" should not be empty", HttpStatus.BAD_REQUEST);
             }
-
         }
-        return getUserById(id);
+        userDao.save(user);
+        return UserMapper.mapUserToDto(user);
     }
 
     @Override
     public void deleteUser(int id) {
         log.info("Delete user with id = {}", id);
-        userDao.deleteObject(id);
+        userDao.deleteById(id);
     }
 
     @Override
     public List<UserDTO> getAllUsers() {
         List<UserDTO> users = new ArrayList<>();
-        if (!userDao.getAllObjects().isEmpty()) {
-            for (User user : userDao.getAllObjects().values()) {
+        List<User> allUsers = userDao.findAll();
+        if (!allUsers.isEmpty()) {
+            for (User user : allUsers) {
                 users.add(UserMapper.mapUserToDto(user));
             }
         }
         log.info("return {}", users);
         return users;
     }
-
 
 }
